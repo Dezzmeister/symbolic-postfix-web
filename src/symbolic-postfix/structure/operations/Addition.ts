@@ -42,13 +42,35 @@ export default class Addition extends Function {
 	}
 
 	/**
-	 * TODO: Implement this
+	 * Simplifies all operands and adds anything that simplifies to a value. If the entire operation can be simplified
+	 * to a value, returns a Value. Otherwise returns either an Addition or some other Expression.
 	 * 
 	 * @param {Map<Variable, Value>} knowns known variables
 	 * @return {Expression} simplified version of this addition
 	 */
 	public simplify(knowns: Map<Variable, Value>): Expression {
-		return this;
+		let numericalResult = 0;
+		let symbolicResult = new Array<Expression>();
+
+		for (let i = 0; i < this.args.length; i++) {
+			let arg = this.args[i].simplify(knowns);
+
+			if (arg.hasUnknowns(knowns) || !(arg instanceof Value)) {
+				symbolicResult.push(arg);
+			} else {
+				numericalResult += (arg as Value).value;
+			}
+		}
+
+		if (symbolicResult.length === 0) {
+			return new Value(numericalResult);
+		} else if (numericalResult === 0) {
+			return symbolicResult[0];
+		} else {
+			symbolicResult.push(new Value(numericalResult));
+
+			return new Addition(symbolicResult);
+		}
 	}
 
 	/**
