@@ -57,11 +57,13 @@ export default class Addition extends Function {
 	 * @return {string} string representing this addition
 	 */
 	public toString(): string {
-		let out = this.args[0].toString();
+		let out = "(" + this.args[0].toString();
 
 		for (let i = 1; i < this.args.length; i++) {
 			out = out + " + " + this.args[i].toString();
 		}
+
+		out += ")";
 
 		return out;
 	}
