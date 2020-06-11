@@ -7,6 +7,14 @@ import Value from "./Value";
  * @author Joe Desmond
  */
 export default interface Expression {
+
+	/**
+	 * Returns true if this Expression is a function of the given variable.
+	 * 
+	 * @param {string} variable variable name
+	 * @return {boolean} true if this Expression depends on 'variable'
+	 */
+	isFunctionOf(variable: string): boolean;
 		
 	/**
 	 * Returns the symbolic derivative of this Expression with respect to the given variable.
@@ -23,6 +31,15 @@ export default interface Expression {
 	 * @return {Expression} simplified version of this Expression
 	 */
 	simplify(knowns: Map<Variable, Value>): Expression;
+
+	/**
+	 * Returns true if this Expression has any unknowns (i.e., variables without mappings
+	 * in 'knowns').
+	 * 
+	 * @param {Map<Variable, Value>} knowns known variables
+	 * @return {boolean} true if this Expression contains any unknown variables
+	 */
+	hasUnknowns(knowns: Map<Variable, Value>): boolean;
 
 	/**
 	 * Returns true if this Expression has the same structure as 'other',

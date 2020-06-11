@@ -13,8 +13,23 @@ export default class Variable implements Expression {
 	 */
 	public readonly name: string;
 
+	/**
+	 * Creates a Variable with the given case-sensitive name.
+	 * 
+	 * @param {string} name name of this variable 
+	 */
 	public constructor(name: string) {
 		this.name = name;
+	}
+
+	/**
+	 * Returns true if this Variable has the name given by the string parameter.
+	 * 
+	 * @param {string} variable variable name
+	 * @return {boolean} true if this Variable is a function of 'variable' (they have the same name)
+	 */
+	public isFunctionOf(variable: string): boolean {
+		return (this.name === variable);
 	}
 
 	/**
@@ -24,7 +39,7 @@ export default class Variable implements Expression {
 	 * @return {Expression} one or zero
 	 */
 	public derivative(variable: string): Expression {
-		if (name === variable) {
+		if (this.name === variable) {
 			return Value.ONE;
 		} else {
 			return Value.ZERO;
@@ -44,6 +59,16 @@ export default class Variable implements Expression {
 		} else {
 			return this;
 		}
+	}
+
+	/**
+	 * Returns true if the provided map contains a mapping for this Variable.
+	 * 
+	 * @param {Map<Variable, Value>} knowns known variables
+	 * @return {boolean} true if this Variable exists in the provided map 
+	 */
+	public hasUnknowns(knowns: Map<Variable, Value>): boolean {
+		return knowns.has(this);
 	}
 
 	/**

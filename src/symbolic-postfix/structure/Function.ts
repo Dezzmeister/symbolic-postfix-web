@@ -41,7 +41,7 @@ export default abstract class Function implements Expression {
 	 * @param name name of this function
 	 * @param args arguments to this function
 	 * @param minArgs minimum allowed arguments to this function (inclusive)
-	 * @param maxArgs maximum allowed arguments to this function (exclusive)
+	 * @param maxArgs maximum allowed arguments to this function (inclusive)
 	 * @param commutativeArgs true if the arguments are commutative, false if not
 	 */
 	protected constructor(name: string, args: Array<Expression>, minArgs: number, maxArgs: number, commutativeArgs: boolean) {
@@ -82,12 +82,46 @@ export default abstract class Function implements Expression {
 
 		return false;
 	}
+
+	/**
+	 * Returns true if any of the arguments to this Function are a function of 'variable'.
+	 * Traverses the Expression tree and returns true if a Variable object exists with the given name.
+	 * 
+	 * @param {string} variable variable known
+	 * @return {boolean} true if this Function is a function of 'variable'
+	 */
+	public isFunctionOf(variable: string): boolean {
+		for (let i = 0; i < this.args.length; i++) {
+			if (this.args[i].isFunctionOf(variable)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 		
 	public abstract derivative(variable: string): Expression;
 
 	public abstract simplify(knowns: Map<Variable, Value>): Expression;
 
 	public abstract toString(): string;
+
+	/**
+	 * Returns true if any of the arguments to this function contain unknowns, given the known variables in 'knowns'.
+	 * (Calls 'hasUnknowns()' on each argument)
+	 * 
+	 * @param {Map<Variable, Value>} knowns known variables
+	 * @return true if any of the arguments contain unknowns
+	 */
+	public hasUnknowns(knowns: Map<Variable, Value>): boolean {
+		for (let i = 0; i < this.args.length; i++) {
+			if (this.args[i].hasUnknowns(knowns)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Returns true if the other Expression is a Function and has the same arguments 

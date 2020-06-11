@@ -23,6 +23,16 @@ export default class Value implements Expression {
 	}
 
 	/**
+	 * Returns false, because a constant value is not a function of any variable.
+	 * 
+	 * @param {string} variable variable name (unused)
+	 * @return {boolean} false 
+	 */
+	public isFunctionOf(variable: string): boolean {
+		return false;
+	}
+
+	/**
 	 * Returns zero, because the derivative of a constant is zero.
 	 * 
 	 * @param {string} variable unused
@@ -40,6 +50,16 @@ export default class Value implements Expression {
 	 */
 	public simplify(knowns: Map<Variable, Value>): Expression {
 		return this;
+	}
+
+	/**
+	 * Returns false, because a single Value cannot have any unknowns.
+	 * 
+	 * @param {Map<Variable, Value} knowns known variables (unused)
+	 * @return {boolean} false
+	 */
+	public hasUnknowns(knowns: Map<Variable, Value>): boolean {
+		return false;
 	}
 
 	/**
