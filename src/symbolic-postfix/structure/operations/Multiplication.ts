@@ -1,5 +1,6 @@
 import Expression from "../Expression";
 import Function from "../Function";
+import {SplitFunction} from "../Function";
 import Variable from "../Variable";
 import Value from "../Value";
 import {plus, multiply} from "../builder/ShorthandFunctions";
@@ -53,6 +54,15 @@ export default class Multiplication extends Function {
 		return plus(derivTerms);
 	}
 
+	public split(knowns: Map<Variable, Value>): SplitFunction {
+		let out = {
+			expressions: new Array<Expression>(),
+			value: Value.ZERO
+		};
+
+		return out;
+	}
+
 	/**
 	 * TODO: Implement this
 	 * 
@@ -60,7 +70,13 @@ export default class Multiplication extends Function {
 	 * @return {Expression} simplified version of this multiplication
 	 */
 	public simplify(knowns: Map<Variable, Value>): Expression {
-		return this;
+		let simplArgs = new Array<Expression>();
+
+		for (let i = 0; i < this.args.length; i++) {
+			simplArgs.push(this.args[i].simplify(knowns));
+		}
+
+		return new Multiplication(simplArgs);
 	}
 
 	/**

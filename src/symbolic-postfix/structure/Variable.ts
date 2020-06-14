@@ -1,5 +1,6 @@
 import Expression from "./Expression";
 import Value from "./Value";
+import EqualComparable from "../../structures/EqualComparable";
 
 /**
  * An unknown variable.
@@ -55,20 +56,20 @@ export default class Variable implements Expression {
 	 */
 	public simplify(knowns: Map<Variable, Value>): Expression {
 		if (knowns.has(this)) {
-			return knowns.get(this) as Expression;
+			return knowns.get(this) as Value;
 		} else {
 			return this;
 		}
 	}
 
 	/**
-	 * Returns true if the provided map contains a mapping for this Variable.
+	 * Returns true if the provided map does not contain a mapping for this Variable.
 	 * 
 	 * @param {Map<Variable, Value>} knowns known variables
-	 * @return {boolean} true if this Variable exists in the provided map 
+	 * @return {boolean} false if this Variable exists in the provided map 
 	 */
 	public hasUnknowns(knowns: Map<Variable, Value>): boolean {
-		return knowns.has(this);
+		return !knowns.has(this);
 	}
 
 	/**
@@ -94,5 +95,25 @@ export default class Variable implements Expression {
 	 */
 	public toString(): string {
 		return this.name;
+	}
+
+	public hashcode(): number {
+		let sum = 0;
+
+		for (let i = 0; i < this.name.length; i++) {
+			let code = this.name.charCodeAt(i);
+
+			sum += code;
+		}
+
+		return sum;
+	}
+
+	public equals(other: EqualComparable): boolean {
+		if (other instanceof Variable) {
+			return this.structuralEquals(other as Variable);
+		}
+
+		return false;
 	}
 }

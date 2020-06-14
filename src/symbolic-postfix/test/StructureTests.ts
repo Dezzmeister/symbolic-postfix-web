@@ -6,6 +6,26 @@ import {plus, multiply} from "../structure/builder/ShorthandFunctions"
  * Testing the symbolic-postfix/structure classes and Expression trees.
  */
 function structureTests(): void {
+	structureTests2();
+}
+
+function structureTests2(): void {
+	let xVar = new Variable("x");
+	let yVar = new Variable("y");
+	let emptyMap = new Map<Variable, Value>();
+
+	let expr0 = plus([new Value(3), new Value(5)]);
+	let expr1 = plus([xVar, yVar, new Value(3), new Value(4)]);
+	let expr2 = plus([xVar, expr1, expr0, new Value(2), multiply([xVar, expr0])]);
+	let expr3 = plus([xVar, expr2, new Value(4), new Value(7)]);
+	let expr4 = plus([expr3, expr3, expr0]);
+
+	console.log("Expr0: " + expr4);
+	console.log("Simpl0: " + expr4.simplify(emptyMap));
+}
+
+// eslint-disable-next-line
+function structureTests1(): void {
 	let xVar = new Variable("x");
 
 	let emptyMap = new Map<Variable, Value>();

@@ -1,6 +1,24 @@
 import Expression from "./Expression";
 import Variable from "./Variable";
 import Value from "./Value";
+import EqualComparable from "../../structures/EqualComparable";
+
+/**
+ * A data type representing the components of a Function. This type can be used to extract
+ * coefficients from a multiplication, values from an addition, etc.
+ */
+export type SplitFunction = {
+
+	/**
+	 * The symbolic and unsolvable components of the function
+	 */
+	expressions: Array<Expression>
+
+	/**
+	 * The known component of the function (may be zero)
+	 */
+	value: Value;
+}
 
 /**
  * A function with zero or more arguments. Can be used to implement operations such as addition and multiplication.
@@ -99,6 +117,14 @@ export default abstract class Function implements Expression {
 
 		return false;
 	}
+
+	/**
+	 * Splits this Function into a known value component and unknown symbolic component.
+	 * 
+	 * @param {Map<Variable, Value>} knowns known variables
+	 * @return {SplitFunction} this Function, split into symbolic and valued components
+	 */
+	public abstract split(known: Map<Variable, Value>): SplitFunction;
 		
 	public abstract derivative(variable: string): Expression;
 
@@ -196,5 +222,23 @@ export default abstract class Function implements Expression {
 
 			return true;
 		}			
+	}
+
+	public hashcode(): number {
+		let sum = 0;
+
+		for (let i = 0; i < this.args.length; i++) {
+			sum += this.args[i].hashcode();
+		}
+
+		return sum;
+	}
+
+	public equals(other: EqualComparable): boolean {
+		if (other instanceof Function) {
+			return this.structuralEquals(other as Function);
+		}
+
+		return false;
 	}
 }

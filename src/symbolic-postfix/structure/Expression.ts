@@ -1,12 +1,14 @@
 import Variable from "./Variable";
 import Value from "./Value";
+import Hashable from "../../structures/Hashable";
+import EqualComparable from "../../structures/EqualComparable";
 
 /**
  * A high-level mathematical expression. Has a recursive structure consisting of Values, Variables, and Functions.
  * 
  * @author Joe Desmond
  */
-export default interface Expression {
+export default interface Expression extends Hashable {
 
 	/**
 	 * Returns true if this Expression is a function of the given variable.
@@ -34,7 +36,7 @@ export default interface Expression {
 
 	/**
 	 * Returns true if this Expression has any unknowns (i.e., variables without mappings
-	 * in 'knowns').
+	 * in 'knowns'). If this function returns false, then 'simplify()' should return a single Value.
 	 * 
 	 * @param {Map<Variable, Value>} knowns known variables
 	 * @return {boolean} true if this Expression contains any unknown variables
@@ -56,4 +58,20 @@ export default interface Expression {
 	 * @return {string} human-readable version of this Expression
 	 */
 	toString(): string;
+	
+	/**
+	 * Calculates a hashcode for this Expression. Inherited from Hashable.
+	 * 
+	 * @return {number} hashcode
+	 */
+	hashcode(): number;
+	
+	/**
+	 * Returns true if this Expression is equal to another. Equality may be determined using 
+	 * 'structuralEquals()' or another method. Inherited from Hashable.
+	 * 
+	 * @param {EqualComparable} other another object
+	 * @return {boolean} true if this is logically equal to 'other' 
+	 */
+	equals(other: EqualComparable): boolean;
 }

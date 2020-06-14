@@ -1,5 +1,6 @@
 import Expression from "./Expression";
 import Variable from "./Variable";
+import EqualComparable from "../../structures/EqualComparable";
 
 /**
  * A known numeric constant. Is also an Expression.
@@ -18,6 +19,11 @@ export default class Value implements Expression {
 	 */
 	public readonly value: number;
 
+	/**
+	 * Constructs a Value object with the given numerical value.
+	 * 
+	 * @param {number} value the actual value
+	 */
 	public constructor(value: number) {
 		this.value = value;
 	}
@@ -84,5 +90,17 @@ export default class Value implements Expression {
 	 */
 	public toString(): string {
 		return this.value.toString();
+	}
+
+	public hashcode(): number {
+		return this.value;
+	}
+
+	public equals(other: EqualComparable): boolean {
+		if (other instanceof Value) {
+			return this.structuralEquals(other as Value);
+		}
+
+		return false;
 	}
 }

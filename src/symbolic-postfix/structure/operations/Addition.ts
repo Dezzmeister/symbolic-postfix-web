@@ -1,7 +1,10 @@
 import Expression from "../Expression";
 import Function from "../Function";
+import {SplitFunction} from "../Function";
 import Variable from "../Variable";
 import Value from "../Value";
+import Multiplication from "./Multiplication";
+import HashMap from "../../../structures/HashMap";
 
 /**
  * The addition operation, with any number of addends.
@@ -42,6 +45,42 @@ export default class Addition extends Function {
 	}
 
 	/**
+	 * Traverses the argument tree and tries to extract nested addition operations.
+	 * The only simplification performed is the addition of numerical Values.
+	 * 
+	 * @param {Map<Variable, Value>} knowns known variables (unused)
+	 * @return {SplitFunction} split components of this Addition 
+	 */
+	public split(knowns: Map<Variable, Value>): SplitFunction {
+		let numericalResult = 0;
+		let symbolicResult = new Array<Expression>();
+
+		for (let i = 0; i < this.args.length; i++) {
+			let arg = this.args[i];
+
+			if (arg instanceof Value) {
+				numericalResult += (arg as Value).value;
+			} else if (arg instanceof Addition) {
+				let nextArgs = (arg as Addition).split(knowns);
+				numericalResult += nextArgs.value.value;
+
+				for (let j = 0; j < nextArgs.expressions.length; j++) {
+					symbolicResult.push(nextArgs.expressions[j]);
+				}
+			} else {
+				symbolicResult.push(arg);
+			}
+		}
+
+		let out:SplitFunction = {
+			expressions: symbolicResult,
+			value: new Value(numericalResult)
+		};
+
+		return out;
+	}
+
+	/**
 	 * Simplifies all operands and adds anything that simplifies to a value. If the entire operation can be simplified
 	 * to a value, returns a Value. Otherwise returns either an Addition or some other Expression.
 	 * 
@@ -49,27 +88,68 @@ export default class Addition extends Function {
 	 * @return {Expression} simplified version of this addition
 	 */
 	public simplify(knowns: Map<Variable, Value>): Expression {
-		let numericalResult = 0;
-		let symbolicResult = new Array<Expression>();
-
+		let simplArgs = new Array<Expression>();
+		
 		for (let i = 0; i < this.args.length; i++) {
-			let arg = this.args[i].simplify(knowns);
+			simplArgs.push(this.args[i].simplify(knowns));
+		}
 
-			if (arg.hasUnknowns(knowns) || !(arg instanceof Value)) {
-				symbolicResult.push(arg);
+		// A version of this Addition with all arguments simplified
+		let simplAddition = new Addition(simplArgs);
+
+		// Check if the operation can be fully evaluated
+		if (!simplAddition.hasUnknowns(knowns)) {
+			let sum = 0;
+
+			for (let i = 0; i < simplArgs.length; i++) {
+				sum += (simplArgs[i].simplify(knowns) as Value).value;
+			}
+
+			return new Value(sum);
+		}
+
+		// Now we need to split the arguments and try to group them
+
+		let splitArgs = simplAddition.split(knowns);
+		let exprs = splitArgs.expressions;
+
+		let groups = new HashMap<Expression, number>();
+
+		for (let i = 0; i < exprs.length; i++) {
+			let expr = exprs[i];
+			if (!groups.has(expr)) {
+				console.log(expr.toString());
+				groups.put(expr, 1);
 			} else {
-				numericalResult += (arg as Value).value;
+				let count = groups.get(expr) as number;
+				groups.put(expr, count + 1);
+			}
+		}
+		
+		let keys = groups.keys();
+
+		let groupedArgs = new Array<Expression>();
+
+		for (let i = 0; i < keys.length; i++) {
+			let arg = keys[i];
+			let count = groups.get(keys[i]) as number;
+			
+			if (count === 1) {
+				groupedArgs.push(arg);
+			} else {
+				let grouped = new Multiplication([new Value(count), arg]).simplify(knowns);
+
+				groupedArgs.push(grouped);
 			}
 		}
 
-		if (symbolicResult.length === 0) {
-			return new Value(numericalResult);
-		} else if (numericalResult === 0) {
-			return symbolicResult[0];
-		} else {
-			symbolicResult.push(new Value(numericalResult));
 
-			return new Addition(symbolicResult);
+		if (groupedArgs.length === 0) {
+			return splitArgs.value;
+		} else {
+			groupedArgs.push(splitArgs.value);
+
+			return new Addition(groupedArgs);
 		}
 	}
 
