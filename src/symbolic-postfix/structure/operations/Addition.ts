@@ -46,7 +46,7 @@ export default class Addition extends Function {
 
 	/**
 	 * Traverses the argument tree and tries to extract nested addition operations.
-	 * The only simplification performed is the addition of numerical Values.
+	 * Simplification is not performed on Addition arguments.
 	 * 
 	 * @param {Map<Variable, Value>} knowns known variables (unused)
 	 * @return {SplitFunction} split components of this Addition 
@@ -68,7 +68,7 @@ export default class Addition extends Function {
 					symbolicResult.push(nextArgs.expressions[j]);
 				}
 			} else {
-				symbolicResult.push(arg);
+				symbolicResult.push(arg.simplify(knowns));
 			}
 		}
 
@@ -91,7 +91,13 @@ export default class Addition extends Function {
 		let simplArgs = new Array<Expression>();
 		
 		for (let i = 0; i < this.args.length; i++) {
-			simplArgs.push(this.args[i].simplify(knowns));
+			let arg = this.args[i];
+
+			if (arg instanceof Addition) {
+				simplArgs.push(arg);
+			} else {
+				simplArgs.push(arg.simplify(knowns));
+			}
 		}
 
 		// A version of this Addition with all arguments simplified
@@ -116,30 +122,27 @@ export default class Addition extends Function {
 		let groups = new HashMap<Expression, number>();
 
 		for (let i = 0; i < exprs.length; i++) {
-			let expr = exprs[i];
-			if (!groups.has(expr)) {
-				console.log(expr.toString());
-				groups.put(expr, 1);
+			let arg = exprs[i];
+
+			if (!groups.has(arg)) {
+				groups.put(arg, 1);
 			} else {
-				let count = groups.get(expr) as number;
-				groups.put(expr, count + 1);
+				let count = groups.get(arg) as number;
+				groups.put(arg, count + 1);
 			}
 		}
-		
+
+		let groupedArgs = new Array<Expression>(groups.length());
 		let keys = groups.keys();
 
-		let groupedArgs = new Array<Expression>();
-
 		for (let i = 0; i < keys.length; i++) {
-			let arg = keys[i];
-			let count = groups.get(keys[i]) as number;
-			
-			if (count === 1) {
-				groupedArgs.push(arg);
-			} else {
-				let grouped = new Multiplication([new Value(count), arg]).simplify(knowns);
+			let expr = keys[i];
+			let count = groups.get(expr) as number;
 
-				groupedArgs.push(grouped);
+			if (count === 1) {
+				groupedArgs[i] = expr;
+			} else {
+				groupedArgs[i] = new Multiplication([new Value(count), expr]).simplify(knowns);
 			}
 		}
 

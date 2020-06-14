@@ -9,6 +9,17 @@ function structureTests(): void {
 	structureTests2();
 }
 
+// eslint-disable-next-line
+function structureTests3(): void {
+	let emptyMap = new Map<Variable, Value>();
+
+	let expr0 = plus([new Value(3), new Value(5)]);
+
+	console.log("Expr0: " + expr0);
+	console.log("Simpl0: " + expr0.simplify(emptyMap));
+}
+
+// eslint-disable-next-line
 function structureTests2(): void {
 	let xVar = new Variable("x");
 	let yVar = new Variable("y");

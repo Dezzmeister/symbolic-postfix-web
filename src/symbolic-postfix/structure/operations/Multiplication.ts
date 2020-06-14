@@ -71,7 +71,7 @@ export default class Multiplication extends Function {
 	 */
 	public simplify(knowns: Map<Variable, Value>): Expression {
 		let simplArgs = new Array<Expression>();
-
+		
 		for (let i = 0; i < this.args.length; i++) {
 			simplArgs.push(this.args[i].simplify(knowns));
 		}
